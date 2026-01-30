@@ -9,7 +9,6 @@ on:
 
 jobs:
   publish-docker:
-    needs: build-and-test
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     uses: HiagoScierry/simple-workflow-nodejs-boilerplate/.github/workflows/docker-publish.yml@main
     with:

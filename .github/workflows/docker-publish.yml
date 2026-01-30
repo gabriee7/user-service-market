@@ -1,0 +1,23 @@
+name: Build and Publish Docker Image
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build-and-test:
+    uses: ./nodejs-reusable.yml@main
+    with:
+      run_lint: true
+      run_test: true
+      run_build: true
+
+  publish-docker:
+    uses: HiagoScierry/simple-workflow-nodejs-boilerplate/.github/workflows/docker-publish.yml@main
+    with:
+      dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+      dockerhub-password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      image-name: ${{ github.repository }}:${{ github.ref_name }}
+      build-context: .
+

@@ -1,9 +1,9 @@
 import express from 'express';
 
 
-import defaultRoutes from '@routes/defaultRoutes.js';
-import userRoutes from '@routes/userRoutes.js';
-import productRoutes from '@routes/productRoutes.js';
+import defaultRoutes from './defaultRoutes.js';
+import userRoutes from './userRoutes.js';
+import productRoutes from './productRoutes.js';
 
 
 const router = express.Router();

@@ -8,14 +8,6 @@ on:
 
 
 jobs:
-  build-and-test:
-    uses: ./.github/workflows/nodejs-reusable.yml
-    with:
-      run_lint: true
-      run_test: true
-      run_build: true
-
-
   publish-docker:
     needs: build-and-test
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'

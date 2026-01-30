@@ -48,12 +48,6 @@ docker run -p 3000:3000 meu-app-node
 A aplicação estará disponível em [http://localhost:3000](http://localhost:3000).
 
 ---
-
-on:
-jobs:
-
-on:
-jobs:
 ## ⚙️ Pipeline CI/CD
 
 Este projeto conta com uma pipeline de integração e entrega contínua (CI/CD) altamente automatizada, utilizando o GitHub Actions e um workflow reutilizável hospedado em outro repositório. A seguir, detalhamos cada etapa, variáveis, validações e boas práticas:

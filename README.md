@@ -1,158 +1,121 @@
 
-# Project Base Node.js
+ # market-user-service
 
-Este projeto é um **boilerplate** para a criação de novas aplicações Node.js, pronto para CI/CD e publicação em Docker.
+ Microserviço Node.js (Express) para gerenciamento de usuários — Controller → Service → Repository, MySQL (`mysql2/promise`), validação com `Joi`, hashing de senha com `bcryptjs` e UUIDs com `uuid`.
 
-## Objetivo
+ **Principais responsabilidades:** CRUD de usuários, validação de payloads, tratamento global de erros, documentação OpenAPI/Swagger e inicialização automática do schema (`init.sql`) no startup.
 
-Fornecer uma estrutura inicial organizada e padronizada, facilitando o desenvolvimento de novos projetos com Node.js, promovendo boas práticas e agilidade na configuração inicial.
+ **Rodar localmente**
 
-## Estrutura do Projeto
+ 1. Instale dependências:
 
-- **src/**: Código-fonte principal
-   - **controllers/**: Lógica dos controladores
-   - **repositories/**: Acesso a dados
-   - **routes/**: Definição das rotas
-   - **services/**: Lógica de negócio
-- **tests/**: Testes automatizados (unitários e de integração)
-- **index.js**: Ponto de entrada da aplicação
-- **package.json**: Gerenciamento de dependências
-- **eslint.config.js**: Configuração do ESLint
+    ```bash
+    npm install
+    ```
 
----
+ 2. Crie um arquivo `.env` (ou copie `.env.example`) com variáveis mínimas:
 
-## 🚀 Como rodar localmente
+    - `PORT` (opcional, padrão 3000)
+    - `DB_HOST`
+    - `DB_USER`
+    - `DB_PASSWORD`
+    - `DB_NAME`
+    - `DB_PORT` (opcional)
 
-```bash
-npm install
-npm start
-```
-Acesse em [http://localhost:3000](http://localhost:3000).
+ 3. Inicie a aplicação:
 
----
+    ```bash
+    npm start
+    ```
 
-## 🐳 Publicação e uso com Docker
+ A aplicação roda por padrão em `http://localhost:3000` e cria/atualiza o schema definido em `init.sql` ao iniciar.
 
-### Build da imagem
+ **Testes**
 
-```bash
-docker build -t meu-app-node .
-```
+ - Execute a suíte de testes (unit + integration):
 
-### Rodando o container
+    ```bash
+    npm test
+    ```
 
-```bash
-docker run -p 3000:3000 meu-app-node
-```
+ **Documentação (Swagger/OpenAPI)**
 
-A aplicação estará disponível em [http://localhost:3000](http://localhost:3000).
+ - A documentação interativa está disponível em `http://localhost:3000/api/docs` quando o servidor estiver em execução.
 
----
-## ⚙️ Pipeline CI/CD
+ Endpoints
+ - Observação: as rotas de usuário estão montadas em duas bases para compatibilidade de testes e uso: `/user` e `/api/users` — ambas mapeiam para os mesmos handlers.
 
-Este projeto conta com uma pipeline de integração e entrega contínua (CI/CD) altamente automatizada, utilizando o GitHub Actions e um workflow reutilizável hospedado em outro repositório. A seguir, detalhamos cada etapa, variáveis, validações e boas práticas:
+ Base paths:
+ - `/user`
+ - `/api/users`
 
-### Visão Geral
+ Recursos e exemplos
+ - Criar usuário
+   - POST /user
+   - Payload (JSON):
 
-A pipeline é disparada automaticamente a cada push na branch `main` (ou outras branches configuradas). Ela garante que todo código enviado para o repositório passe por validações rigorosas antes de ser publicado como imagem Docker.
+     ```json
+     {
+       "name": "Alice",
+       "email": "alice@example.com",
+       "password": "secret"
+     }
+     ```
 
-### Etapas detalhadas da pipeline
+   - Response: 201 Created
+     ```json
+     {
+       "id": "uuid-v4",
+       "name": "Alice",
+       "email": "alice@example.com",
+       "createdAt": "2026-01-01T00:00:00.000Z",
+       "updatedAt": "2026-01-01T00:00:00.000Z"
+     }
+     ```
 
-1. **Checkout do código**
-  - O workflow faz o checkout do código-fonte do repositório para o runner do GitHub Actions.
+ - Listar usuários
+   - GET /user
+   - Response: 200 OK — array de `UserResponse`.
 
-2. **Configuração do Node.js**
-  - Define a versão do Node.js a ser utilizada (ex: 20.x), garantindo ambiente consistente para build e testes.
+ - Buscar por id
+   - GET /user/:id
+   - Response: 200 OK ou 404 Not Found
 
-3. **Instalação de dependências**
-  - Executa `npm install` para instalar todas as dependências do projeto, conforme o `package.json`.
+ - Atualizar usuário
+   - PUT /user/:id
+   - Payload: mesmo formato do POST (todos os campos opcionais)
+   - Response: 200 OK com o usuário atualizado
 
-4. **Execução dos testes automatizados**
-  - Roda todos os testes unitários e de integração definidos no projeto.
-  - Se qualquer teste falhar, a pipeline é interrompida e o build Docker não é realizado.
-  - Os resultados dos testes ficam disponíveis nos logs do workflow.
+ - Deletar usuário
+   - DELETE /user/:id
+   - Response: 204 No Content
 
-5. **Build da aplicação**
-  - Caso haja etapa de build (ex: transpilar TypeScript, gerar arquivos estáticos), ela é executada aqui.
+ Esquemas (resumo)
+ - UserRequest: `{ name, email, password }`
+ - UserResponse: `{ id, name, email, createdAt, updatedAt }`
 
-6. **Build da imagem Docker**
-  - Utiliza o Dockerfile do projeto para construir uma imagem Docker da aplicação.
-  - A tag da imagem normalmente utiliza o hash do commit (`${{ github.sha }}`) para garantir rastreabilidade.
+ Observações de implementação
+ - Senhas são armazenadas apenas em formato hashed (bcrypt).
+ - Validações de payload usam `Joi` e retornam `400 Bad Request` para entradas inválidas.
+ - Erros de domínio usam exceções customizadas (`ConflictException`, `NotFoundException`, `BadRequestException`) e o middleware global formata respostas JSON com `{ error: 'mensagem' }`.
+ - O startup executa `init.sql` para garantir que o schema/BD exista; configure corretamente as credenciais no `.env` antes de rodar.
 
-7. **Login no Docker Registry**
-  - Realiza login no Docker Hub (ou outro registry) usando as secrets configuradas no repositório.
-  - As secrets necessárias são:
-    - `DOCKERHUB_USERNAME`: usuário do Docker Hub
-    - `DOCKERHUB_PASSWORD`: token de acesso do Docker Hub (nunca use senha diretamente)
+ Deploy / Docker
+ - O projeto inclui um `Dockerfile`. Para construir e rodar:
 
-8. **Push da imagem Docker**
-  - Publica a imagem Docker construída para o registry configurado.
-  - Permite que a imagem seja utilizada em ambientes de produção, homologação, etc.
+    ```bash
+    docker build -t market-user-service .
+    docker run -p 3000:3000 --env-file .env market-user-service
+    ```
 
-9. **Deploy automático (opcional)**
-  - Caso configurado, pode acionar um deploy automático após o push da imagem.
+ CI/CD
+ - Há um workflow de exemplo em `.github/workflows/main.yml` que utiliza um reusable workflow para build/push.
+ - Configure as secrets `DOCKERHUB_USERNAME` e `DOCKERHUB_PASSWORD` para publicar imagens.
 
-### Uso de reusable workflow
-
-Esta pipeline utiliza um **reusable workflow** hospedado em outro repositório:
-
-```
-HiagoScierry/simple-workflow-nodejs-boilerplate/.github/workflows/nodejs-reusable.yml@main
-```
-
-Isso garante padronização, reuso e fácil manutenção das etapas de CI/CD entre múltiplos projetos. Para utilizar, basta referenciar o workflow externo no seu arquivo local:
-
-```yaml
-jobs:
-  build-and-push:
-   uses: HiagoScierry/simple-workflow-nodejs-boilerplate/.github/workflows/nodejs-reusable.yml@main
-   secrets: inherit
-```
-
-### Variáveis e secrets
-
-- **Secrets obrigatórias:**
-  - `DOCKERHUB_USERNAME` e `DOCKERHUB_PASSWORD` devem ser configuradas nas configurações do repositório (Settings > Secrets and variables > Actions).
-  - Essas secrets são usadas para autenticar no Docker Hub e publicar a imagem.
-- **Outras variáveis:**
-  - O workflow pode aceitar variáveis extras para customização (consulte o reusable workflow para detalhes).
-
-### Validações e boas práticas
-
-- **Testes são obrigatórios:** O build e a publicação Docker só ocorrem se todos os testes passarem.
-- **Imagens versionadas:** Use sempre tags únicas (ex: hash do commit) para rastrear builds.
-- **Segurança:** Nunca exponha secrets no código ou logs. Use sempre o mecanismo de secrets do GitHub.
-- **Padronização:** O uso de reusable workflow facilita a manutenção e padronização entre projetos.
-
-### Exemplo de workflow local (`.github/workflows/ci-cd.yml`):
-
-```yaml
-name: CI/CD
-
-on:
-  push:
-   branches: [main]
-
-jobs:
-  build-and-push:
-   uses: HiagoScierry/simple-workflow-nodejs-boilerplate/.github/workflows/nodejs-reusable.yml@main
-   secrets: inherit
-```
-
-> **Importante:**
-> - Configure as secrets `DOCKERHUB_USERNAME` e `DOCKERHUB_PASSWORD` no repositório para permitir o login e o push da imagem Docker.
-> - O workflow acima utiliza um workflow reutilizável (reusable workflow) de outro repositório, promovendo padronização e reuso entre projetos.
-
----
-
-## Recomendações
-
-- Utilize o ESLint para manter o padrão de código.
-- Organize novas funcionalidades seguindo a estrutura proposta.
-- Escreva testes para garantir a qualidade do código.
-- Use caminhos relativos nos imports para garantir compatibilidade com Docker e Node.js ES Modules.
-- O servidor deve escutar em `0.0.0.0` para funcionar no Docker.
-
----
-
-Sinta-se à vontade para customizar este boilerplate conforme as necessidades do seu projeto!
+ Arquivos importantes
+ - `index.js` — bootstrap e mounts (rotas + Swagger)
+ - `src/routes/*` — definição de rotas
+ - `src/controllers/*` — handlers HTTP
+ - `src/services/*` — regras de negócio
+ - `src/repositories/*` — acesso ao MySQL
+ - `init.sql` — DDL do schema usado no startup

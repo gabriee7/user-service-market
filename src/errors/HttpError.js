@@ -1,3 +1,5 @@
+import { StatusCodes } from 'http-status-codes';
+
 export default class HttpError extends Error {
   constructor(message, statusCode) {
     super(message);

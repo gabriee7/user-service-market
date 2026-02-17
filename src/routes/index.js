@@ -6,8 +6,8 @@ import openapiSpec from '#docs/openapi.js';
 
 const router = express.Router();
 
-router.use('/', defaultRoutes);
-router.use('/api/users', userRoutes);
-router.use('/api/docs', swaggerUi.serve, swaggerUi.setup(openapiSpec));
+router.use('/user', defaultRoutes);
+router.use('/user/api/users', userRoutes);
+router.use('/user/api/docs', swaggerUi.serve, swaggerUi.setup(openapiSpec));
 
 export default router;

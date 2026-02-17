@@ -1,5 +1,5 @@
 const userPaths = {
-  '/api/users': {
+  '/user/api/users': {
     post: {
       tags: ['User'],
       summary: 'create user',
@@ -24,7 +24,7 @@ const userPaths = {
       }
     }
   },
-  '/api/users/{id}': {
+  '/user/api/users/{id}': {
     parameters: [
       { name: 'id', in: 'path', required: true, schema: { type: 'string' }, description: 'User UUID' }
     ],
@@ -64,7 +64,7 @@ const userPaths = {
     }
   }
   ,
-  '/api/users/me': {
+  '/user/api/users/me': {
     get: {
       tags: ['User'],
       summary: 'Get current user profile',
@@ -89,7 +89,7 @@ const userPaths = {
       }
     }
   },
-  '/api/users/me/password': {
+  '/user/api/users/me/password': {
     put: {
       tags: ['User'],
       summary: 'Change password for current user',

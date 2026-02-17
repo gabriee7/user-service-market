@@ -14,9 +14,9 @@ app.use(express.json());
 const PORT = process.env.PORT || 3000;
 
 // Rotas agrupadas
-app.use('/', defaultRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(openapiSpec));
+app.use('/user', defaultRoutes);
+app.use('/user/api/users', userRoutes);
+app.use('/user/api/docs', swaggerUi.serve, swaggerUi.setup(openapiSpec));
 
 // Middleware
 app.use(errorHandler);

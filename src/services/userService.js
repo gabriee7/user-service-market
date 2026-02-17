@@ -38,15 +38,24 @@ const userService = {
       if (byEmail && byEmail.id !== id)
         throw new ConflictException('Email already in use');
     }
-    const hashed = password ? await bcrypt.hash(password, SALT_ROUNDS) : user.password;
     const updated = await userRepository.update(
       id,
       { 
         name: name || user.name,
         email: email || user.email,
-        password: hashed
+        password: user.password
       }
     );
+    return UserMapper.toResponse(updated);
+  },
+
+  async changePassword(id, { currentPassword, newPassword }) {
+    const user = await userRepository.getById(id);
+    if (!user) throw new NotFoundException('User not found');
+    const match = await bcrypt.compare(currentPassword, user.password);
+    if (!match) throw new ConflictException('Current password is incorrect');
+    const hashed = await bcrypt.hash(newPassword, SALT_ROUNDS);
+    const updated = await userRepository.update(id, { name: user.name, email: user.email, password: hashed });
     return UserMapper.toResponse(updated);
   },
 

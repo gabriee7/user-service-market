@@ -8,7 +8,16 @@ const openapi = {
     version: '1.0.0',
     description: 'API Microservices para gestão de usuários no Market'
   },
-  components: { schemas },
+  components: {
+    schemas,
+    securitySchemes: {
+      bearerAuth: {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT'
+      }
+    }
+  },
   paths: userPaths
 };
 

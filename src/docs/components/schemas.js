@@ -8,6 +8,21 @@ const schemas = {
       password: { type: 'string', format: 'password', example: 'senha123' }
     }
   },
+  UserUpdateRequest: {
+    type: 'object',
+    properties: {
+      name: { type: 'string', example: 'João Silva' },
+      email: { type: 'string', format: 'email', example: 'joao@example.com' }
+    }
+  },
+  ChangePasswordRequest: {
+    type: 'object',
+    required: ['currentPassword', 'newPassword'],
+    properties: {
+      currentPassword: { type: 'string', format: 'password' },
+      newPassword: { type: 'string', format: 'password' }
+    }
+  },
   UserResponse: {
     type: 'object',
     properties: {

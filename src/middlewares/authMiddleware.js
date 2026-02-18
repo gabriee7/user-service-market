@@ -8,7 +8,7 @@ export default async function authMiddleware(req, res, next) {
   const authServiceBase = process.env.AUTH_SERVICE_URL;
   if (!authServiceBase)
     throw new HttpError('AUTH_SERVICE_URL not configured;', StatusCodes.INTERNAL_SERVER_ERROR);
-  const verifyPath = '/api/auth/verify';
+  const verifyPath = '/auth/api/auth/verify';
   let verifyUrl;
   const baseUrl = new URL(authServiceBase);
   verifyUrl = new URL(verifyPath, baseUrl).toString();
